@@ -1,0 +1,9 @@
+uploader:
+  id-lang: 1
+
+spring:
+  datasource:
+    url: jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=gdb1.miit.ru)(PORT=1521)))(CONNECT_DATA=(SERVICE_NAME=cgeneral.miit.ru)))
+    username: ${db.username}
+    password: ${db.password}
+    driver-class-name: oracle.jdbc.OracleDriver
