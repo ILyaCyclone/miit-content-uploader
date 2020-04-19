@@ -1,0 +1,13 @@
+{
+  "properties": [
+    {
+      "name": "uploader.id-lang",
+      "type": "java.lang.Integer",
+      "description": "Description for uploader.id-lang."
+    },
+    {
+      "name": "uploader.query-binary-calculated-attributes",
+      "type": "java.lang.Boolean",
+      "description": "Should program query large_binary_data calculated attributes, eg. hash, width, height"
+    }
+  ] }

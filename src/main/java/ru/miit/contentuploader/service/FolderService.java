@@ -1,8 +1,11 @@
-package ru.miit.contentimguploader;
+package ru.miit.contentuploader.service;
 
 import lombok.SneakyThrows;
 import org.apache.commons.io.FilenameUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import ru.miit.contentuploader.model.Content;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -13,6 +16,7 @@ import java.util.stream.Stream;
 
 @Service
 public class FolderService {
+    private static final Logger logger = LoggerFactory.getLogger(FolderService.class);
 
     private final Uploader uploader;
     static final Set<String> supportedExtensions = new HashSet<>(Arrays.asList("jpg", "jpeg", "png", "gif", "svg"));
@@ -21,12 +25,13 @@ public class FolderService {
         this.uploader = uploader;
     }
 
+    public Map<String, Content> massUpload(Path sourceFolderPath, long destIdInfo, int idkContent) {
+        logger.trace("massUpload(sourceFolderPath='{}', destIdInfo={}, idkContent={}", sourceFolderPath, destIdInfo, idkContent);
 
-    public Map<String, Long> massUpload(Path sourceFolderPath, long destIdInfo, long idkContent) {
         List<File> files = readDirectory(sourceFolderPath);
-        Map<String, Long> createdIdContentVersions = files.stream()
+        Map<String, Content> createdContents = files.stream()
                 .collect(Collectors.toMap(File::getName, file -> uploader.uploadFile(file, destIdInfo, idkContent)));
-        return createdIdContentVersions;
+        return createdContents;
     }
 
 

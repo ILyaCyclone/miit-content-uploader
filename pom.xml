@@ -17,9 +17,10 @@
   <!--    <relativePath/> &lt;!&ndash; lookup parent from repository &ndash;&gt;-->
   <!--  </parent>-->
 
-  <artifactId>content-img-uploader</artifactId>
+  <groupId>ru.miit</groupId>
+  <artifactId>content-uploader</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <name>content-img-uploader</name>
+  <name>content-uploader</name>
   <description>Demo project for Spring Boot</description>
 
   <properties>

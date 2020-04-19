@@ -1,4 +1,4 @@
-package ru.miit.contentimguploader;
+package ru.miit.contentuploader.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -8,5 +8,6 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "uploader")
 public class UploaderProperties {
-    private long idLang;
+    private int idLang = 1;
+    private boolean queryBinaryCalculatedAttributes = false;
 }
