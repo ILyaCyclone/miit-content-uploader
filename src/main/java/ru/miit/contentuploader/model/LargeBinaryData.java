@@ -8,5 +8,5 @@ public class LargeBinaryData {
     private String filename;
 
     // null if query-binary-calculated-attributes
-    LargeBinaryMetadata metadata;
+    private LargeBinaryMetadata metadata;
 }

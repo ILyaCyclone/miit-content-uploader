@@ -25,12 +25,22 @@ public class FolderService {
         this.uploader = uploader;
     }
 
+    /**
+     *
+     * @param sourceFolderPath folder path, storing content files
+     * @param destIdInfo id_information where to load (information must be created beforehand)
+     * @param idkContent idk_content for content's to be created
+     * @return map of filename and created content, entries sorted by filename
+     */
     public Map<String, Content> massUpload(Path sourceFolderPath, long destIdInfo, int idkContent) {
         logger.trace("massUpload(sourceFolderPath='{}', destIdInfo={}, idkContent={}", sourceFolderPath, destIdInfo, idkContent);
 
         List<File> files = readDirectory(sourceFolderPath);
         Map<String, Content> createdContents = files.stream()
-                .collect(Collectors.toMap(File::getName, file -> uploader.uploadFile(file, destIdInfo, idkContent)));
+//                .collect(Collectors.toMap(File::getName, file -> uploader.uploadFile(file, destIdInfo, idkContent)));
+                // return sorted map
+                .collect(LinkedHashMap::new, (map, file) -> map.put(file.getName()
+                        , uploader.uploadFile(file, destIdInfo, idkContent)), LinkedHashMap::putAll);
         return createdContents;
     }
 

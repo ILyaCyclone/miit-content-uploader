@@ -1,6 +1,7 @@
 uploader:
   id-lang: 1
   query-binary-calculated-attributes: false
+  dry-run: false
 
 spring:
   datasource:

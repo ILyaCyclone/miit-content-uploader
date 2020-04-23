@@ -8,6 +8,11 @@
     {
       "name": "uploader.query-binary-calculated-attributes",
       "type": "java.lang.Boolean",
-      "description": "Should program query large_binary_data calculated attributes, eg. hash, width, height"
+      "description": "Should program query large_binary_data calculated attributes, eg. hash, width, height."
+    },
+    {
+      "name": "uploader.dry-run",
+      "type": "java.lang.Boolean",
+      "description": "Don't do any database inserts actually."
     }
   ] }
