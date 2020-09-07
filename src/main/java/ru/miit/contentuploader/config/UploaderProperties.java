@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "uploader")
 public class UploaderProperties {
     private int idLang = 1;
-    private boolean queryBinaryCalculatedAttributes = false;
-    private boolean dryRun;
+    private boolean queryBinaryMetadata = false;
+    private boolean dryRun = false;
+
+    private String version;
 }

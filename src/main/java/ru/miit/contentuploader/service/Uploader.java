@@ -34,7 +34,7 @@ public class Uploader {
     @Transactional
     public Content uploadFile(File file, long idInfo, int idkContent) {
         String filename = file.getName();
-        logger.info("loading file {}", filename);
+        logger.info("uploading file '{}'", filename);
         String extension = FilenameUtils.getExtension(filename);
 
         Content content = uploadRepository.createContent(idkContent);

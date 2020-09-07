@@ -17,9 +17,8 @@
   <!--    <relativePath/> &lt;!&ndash; lookup parent from repository &ndash;&gt;-->
   <!--  </parent>-->
 
-  <groupId>ru.miit</groupId>
   <artifactId>content-uploader</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>1.1.0</version>
   <name>content-uploader</name>
   <description>Demo project for Spring Boot</description>
 
@@ -108,11 +107,20 @@
 
 
   <build>
+    <finalName>uploader</finalName>
+
     <plugins>
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
         <version>${spring-boot.version}</version>
+        <executions>
+          <execution>
+            <configuration>
+              <mainClass>ru.miit.contentuploader.ContentUploaderApplication</mainClass>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

@@ -56,7 +56,7 @@ public class UploadDryRunRepository implements UploadRepository {
         largeBinaryData.setIdContentVersion(idContentVersion);
         largeBinaryData.setFilename(filename);
 
-        if (uploaderProperties.isQueryBinaryCalculatedAttributes()) {
+        if (uploaderProperties.isQueryBinaryMetadata()) {
             largeBinaryData.setMetadata(new LargeBinaryMetadata(Instant.now(), "somehash" + idContentVersion
                     , new Random().nextInt(2000), new Random().nextInt(2000)));
         }

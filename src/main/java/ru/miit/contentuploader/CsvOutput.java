@@ -28,15 +28,15 @@ public class CsvOutput {
         this(contentMap, uploaderProperties, DEFAULT_DELIMITER);
     }
 
-    public CsvOutput(Map<String, Content> contentMap, UploaderProperties uploaderProperties, String delimeter) {
+    public CsvOutput(Map<String, Content> contentMap, UploaderProperties uploaderProperties, String delimiter) {
         this.created = contentMap;
         this.uploaderProperties = uploaderProperties;
-        this.delimiter = delimeter;
+        this.delimiter = delimiter;
     }
 
     public void print(PrintStream out) {
         String header = String.join(delimiter, headerColumns);
-        if (uploaderProperties.isQueryBinaryCalculatedAttributes()) {
+        if (uploaderProperties.isQueryBinaryMetadata()) {
             header += delimiter + String.join(delimiter, binaryMetadataHeaderColumns);
         }
 
@@ -48,12 +48,12 @@ public class CsvOutput {
             LargeBinaryMetadata metadata = largeBinaryData.getMetadata();
             List<Object> attributes = new ArrayList<>(Arrays.asList(filename, content.getIdContent(), content.getIdWebMetaterm()
                     , contentVersion.getIdContentVersion(), contentVersion.getIdWebMetaterm(), String.format(anyImageMacroFormat, content.getIdWebMetaterm())));
-            if (uploaderProperties.isQueryBinaryCalculatedAttributes()) {
+            if (uploaderProperties.isQueryBinaryMetadata()) {
                 attributes.addAll(Arrays.asList(metadata.getLastModified(), metadata.getWidth(), metadata.getHeight(), metadata.getHash()));
             }
             String line = attributes.stream()
                     .map(String::valueOf)
-                    .map(string -> string.replaceAll(",", "\\,")) // escape
+                    .map(string -> string.replace(",", "\\,")) // escape
                     .collect(Collectors.joining(delimiter));
             out.println(line);
         });

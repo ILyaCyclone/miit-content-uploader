@@ -27,54 +27,70 @@ import java.util.stream.Stream;
 public class ContentUploaderApplication {
     private static final Logger logger = LoggerFactory.getLogger(ContentUploaderApplication.class);
 
-    private static final String COMMAND_UPLOAD_SINGLE_FOLDER = "upload-folder";
-    private static final String COMMAND_UPLOAD_FOLDER_TREE = "upload-folder-tree";
-
     public static void main(String[] args) {
         try {
-            logger.trace("call with arguments: {}", String.join(", ", args));
+            if (logger.isTraceEnabled()) logger.trace("call with arguments: {}", String.join(", ", args));
 
             if (args.length == 0) {
                 printHelp();
-            }
-
-            String command = args[0];
-            if (!command.equals(COMMAND_UPLOAD_SINGLE_FOLDER) && !command.equals(COMMAND_UPLOAD_FOLDER_TREE)) {
-                printHelp();
-            }
-
-            Path sourceFolderPath = Paths.get(args[1]); // D:\miit\en_landing\images\
-
-            if (command.equals(COMMAND_UPLOAD_SINGLE_FOLDER)) {
-                long destIdInfo = Long.parseLong(args[2]); // 168019
-                int idkContent = Integer.parseInt(args[3]); // 1162
-
-                ApplicationContext context = SpringApplication.run(ContentUploaderApplication.class, args);
-                FolderService folderService = context.getBean(FolderService.class);
-                UploaderProperties uploaderProperties = context.getBean(UploaderProperties.class);
-
-                if (uploaderProperties.isDryRun()) {
-                    logger.info("DRY RUN - no actual content will be created");
-                }
-
-                Map<String, Content> created = uploadSingleFolder(sourceFolderPath, destIdInfo, idkContent, folderService, uploaderProperties);
-                CsvOutput csvOutput = new CsvOutput(created, uploaderProperties);
-                csvOutput.print(new PrintStream(sourceFolderPath+".csv"));
                 return;
             }
 
-            if (command.equals(COMMAND_UPLOAD_FOLDER_TREE)) {
-                int idkContent = Integer.parseInt(args[2]); // 1162
+            String commandArgument = args[0];
+            Command command = Command.fromString(commandArgument);
 
-                ApplicationContext context = SpringApplication.run(ContentUploaderApplication.class, args);
-                FolderService folderService = context.getBean(FolderService.class);
-                UploaderProperties uploaderProperties = context.getBean(UploaderProperties.class);
+            switch (command) {
 
-                if (uploaderProperties.isDryRun()) {
-                    logger.info("DRY RUN - no actual content will be created");
+                case UPLOAD_SINGLE_FOLDER: {
+                    Path sourceFolderPath = Paths.get(args[1]);
+                    long destIdInfo = Long.parseLong(args[2]);
+                    int idkContent = Integer.parseInt(args[3]);
+
+                    ApplicationContext context = SpringApplication.run(ContentUploaderApplication.class, args);
+                    FolderService folderService = context.getBean(FolderService.class);
+                    UploaderProperties uploaderProperties = context.getBean(UploaderProperties.class);
+
+                    logger.info("Uploading folder '{}' to id_information {}, idk_content {}..."
+                            , sourceFolderPath, destIdInfo, idkContent);
+
+                    if (uploaderProperties.isDryRun()) {
+                        logger.info("DRY RUN - no actual content will be created");
+                    }
+
+                    Map<String, Content> created = uploadSingleFolder(sourceFolderPath, destIdInfo, idkContent, folderService, uploaderProperties);
+                    CsvOutput csvOutput = new CsvOutput(created, uploaderProperties);
+                    String csvOutputFilename = sourceFolderPath + ".csv";
+                    csvOutput.print(new PrintStream(csvOutputFilename));
+
+                    logger.info("Finished uploading {} files", created.size());
+                    logger.info("Created CSV file: {}", csvOutputFilename);
+
+                    break;
                 }
+                case UPLOAD_FOLDER_STRUCTURE: {
+                    Path rootFolderPath = Paths.get(args[1]);
+                    int idkContent = Integer.parseInt(args[2]); // 1162
 
-                uploadFolderTree(sourceFolderPath, idkContent, folderService, uploaderProperties);
+                    ApplicationContext context = SpringApplication.run(ContentUploaderApplication.class, args);
+                    FolderService folderService = context.getBean(FolderService.class);
+                    UploaderProperties uploaderProperties = context.getBean(UploaderProperties.class);
+
+                    if (uploaderProperties.isDryRun()) {
+                        logger.info("DRY RUN - no actual content will be created");
+                    }
+
+                    uploadFolderStructure(rootFolderPath, idkContent, folderService, uploaderProperties);
+                    break;
+                }
+                case HELP:
+                    printHelp();
+                    break;
+                case VERSION:
+                    printVersion();
+                    break;
+                default:
+                    System.out.println("First argument must be command");
+                    printHelp();
             }
         } catch (Exception e) {
             printHelp();
@@ -82,53 +98,57 @@ public class ContentUploaderApplication {
         }
     }
 
-    private static void uploadFolderTree(String rootFolderPath, int idkContent, FolderService folderService, UploaderProperties uploaderProperties) throws IOException {
-        uploadFolderTree(Paths.get(rootFolderPath), idkContent, folderService, uploaderProperties);
+    private static void uploadFolderStructure(String rootFolderPath, int idkContent, FolderService folderService, UploaderProperties uploaderProperties) throws IOException {
+        uploadFolderStructure(Paths.get(rootFolderPath), idkContent, folderService, uploaderProperties);
     }
 
-    private static void uploadFolderTree(Path rootFolderPath, int idkContent, FolderService folderService, UploaderProperties uploaderProperties) throws IOException {
-        Stream<Path> paths = Files.walk(rootFolderPath);
-        List<Path> folders = paths
-                .filter(Files::isDirectory)
-                .filter(folder -> !folder.getFileName().toString().equals(rootFolderPath.getFileName().toString())) // not root directory
-                .collect(Collectors.toList());
-        int foldersCount = folders.size();
-        IntStream.range(0, foldersCount)
-                .forEach(i -> {
-                    Path folder = folders.get(i);
-                    String folderName = folder.getFileName().toString();
-                    logger.info("{}/{} Processing folder '{}'", (i + 1), foldersCount, folderName);
+    private static void uploadFolderStructure(Path rootFolderPath, int idkContent, FolderService folderService, UploaderProperties uploaderProperties) throws IOException {
+        String outputFolderPath = rootFolderPath.toString() + "_csv";
+        File outputFolder = new File(outputFolderPath);
+        if (!outputFolder.exists()) outputFolder.mkdir();
 
-                    long destIdInfo = Long.parseLong(folderName);
+        try (Stream<Path> paths = Files.walk(rootFolderPath)) {
+            List<Path> folders = paths
+                    .filter(Files::isDirectory)
+                    .filter(folder -> !folder.getFileName().toString().equals(rootFolderPath.getFileName().toString())) // not root directory
+                    .collect(Collectors.toList());
+            int foldersCount = folders.size();
+            IntStream.range(0, foldersCount)
+                    .forEach(i -> {
+                        Path folder = folders.get(i);
+                        String folderName = folder.getFileName().toString();
+                        logger.info("{}/{} Processing folder '{}'", (i + 1), foldersCount, folderName);
 
-                    Map<String, Content> created = Collections.emptyMap();
-                    try {
-                        created = uploadSingleFolder(folder, destIdInfo, idkContent, folderService, uploaderProperties);
-                    } catch (Exception e) {
-                        logger.error("Failed processing folder '" + folderName + "'", e);
-                    }
-
-                    if (created.isEmpty()) {
-                        System.out.println("Nothing was created");
-                    } else {
+                        Map<String, Content> created = Collections.emptyMap();
                         try {
-                            CsvOutput csvOutput = new CsvOutput(created, uploaderProperties);
-
-                            String outputFolderPath = rootFolderPath.toString() + "_csv";
-                            File outputFolder = new File(outputFolderPath);
-                            if (!outputFolder.exists()) outputFolder.mkdir();
-                            PrintStream fileOutput = new PrintStream(outputFolderPath + "//" + destIdInfo + ".csv");
-                            PrintStream[] outputs = new PrintStream[]{/*System.out, */fileOutput};
-
-                            for (PrintStream output : outputs) {
-                                csvOutput.print(output);
-                            }
+                            long destIdInfo = Long.parseLong(folderName);
+                            created = uploadSingleFolder(folder, destIdInfo, idkContent, folderService, uploaderProperties);
+                        } catch (NumberFormatException e) {
+                            logger.error("Failed processing folder '{}': folder name must be number (ID information)", folderName);
                         } catch (Exception e) {
-                            logger.error("Failed generating output for folder '" + folderName + "'", e);
+                            logger.error("Failed processing folder '{}'", folderName, e);
                         }
-                    }
-                });
-        logger.info("Finished processing {} folders", foldersCount);
+
+                        if (created.isEmpty()) {
+                            logger.info("Nothing was created");
+                        } else {
+                            try {
+                                CsvOutput csvOutput = new CsvOutput(created, uploaderProperties);
+                                String outputFilename = outputFolderPath + File.separator + folderName + ".csv";
+
+                                PrintStream fileOutput = new PrintStream(outputFilename);
+                                PrintStream[] outputs = new PrintStream[]{/*System.out, */fileOutput};
+
+                                for (PrintStream output : outputs) {
+                                    csvOutput.print(output);
+                                }
+                            } catch (Exception e) {
+                                logger.error("Failed generating output for folder '{}'", folderName, e);
+                            }
+                        }
+                    });
+            logger.info("Finished processing {} folders", foldersCount);
+        }
     }
 
 
@@ -154,8 +174,18 @@ public class ContentUploaderApplication {
     }
 
     private static void printHelp() {
-        System.err.println("usage:" +
-                "\n" + COMMAND_UPLOAD_SINGLE_FOLDER + " <source folder path> <destination ID information> <destination IDK content>" +
-                "\n" + COMMAND_UPLOAD_FOLDER_TREE + " <source folder path> <destination IDK content>");
+        System.out.println("usage:" +
+                '\n' + Command.UPLOAD_SINGLE_FOLDER.id() + " <source folder path> <destination ID information> <destination IDK content>" +
+                '\n' + Command.UPLOAD_FOLDER_STRUCTURE.id() + " <source folder path> <destination IDK content>" +
+                '\n' + Command.HELP.id() + " print short help" +
+                '\n' + Command.VERSION.id() + " print program version");
+    }
+
+    private static void printVersion() {
+        ApplicationContext context = SpringApplication.run(ContentUploaderApplication.class);
+        String version = context.getBean(UploaderProperties.class).getVersion();
+
+        System.out.println("Mass content uploader for MIIT schema" +
+                "\nVersion: " + version);
     }
 }

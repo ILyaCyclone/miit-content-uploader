@@ -115,7 +115,7 @@ public class UploadRepositoryImpl implements UploadRepository {
         largeBinaryData.setFilename(filename);
 //        largeBinaryData.setLastModified((Instant)keyHolder.getKeys().get("d_last"));
 
-        if (uploaderProperties.isQueryBinaryCalculatedAttributes()) {
+        if (uploaderProperties.isQueryBinaryMetadata()) {
             LargeBinaryMetadata metadata = getLargeBinaryMetadata(idContentVersion);
             largeBinaryData.setMetadata(metadata);
         }

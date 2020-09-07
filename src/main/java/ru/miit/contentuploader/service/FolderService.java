@@ -19,6 +19,7 @@ public class FolderService {
     private static final Logger logger = LoggerFactory.getLogger(FolderService.class);
 
     private final Uploader uploader;
+    //TODO go to database and fetch supported file types
     static final Set<String> supportedExtensions = new HashSet<>(Arrays.asList("jpg", "jpeg", "png", "gif", "svg"));
 
     public FolderService(Uploader uploader) {
