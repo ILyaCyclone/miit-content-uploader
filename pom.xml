@@ -18,7 +18,7 @@
   <!--  </parent>-->
 
   <artifactId>content-uploader</artifactId>
-  <version>1.1.0</version>
+  <version>1.1.2</version>
   <name>content-uploader</name>
   <description>Demo project for Spring Boot</description>
 
@@ -34,6 +34,8 @@
     <spring-boot.version>2.2.1.RELEASE</spring-boot.version>
 
     <apache-commons-io.version>1.3.2</apache-commons-io.version>
+
+    <maven-resources-plugin.version>2.7</maven-resources-plugin.version>
   </properties>
 
   <!-- jdbc -->
@@ -107,7 +109,14 @@
 
 
   <build>
-    <finalName>uploader</finalName>
+    <finalName>uploader-${project.version}</finalName>
+
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
 
     <plugins>
       <plugin>
@@ -121,6 +130,18 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>${maven-resources-plugin.version}</version>
+        <configuration>
+          <delimiters>
+            <delimiter>@</delimiter>
+          </delimiters>
+          <useDefaultDelimiters>false</useDefaultDelimiters>
+        </configuration>
       </plugin>
     </plugins>
   </build>
