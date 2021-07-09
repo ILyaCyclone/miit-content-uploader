@@ -2,11 +2,11 @@ uploader:
   id-lang: 1
   query-binary-metadata: false
   dry-run: false
-  version: 1.1.0
+  version: 1.1.1
 
 spring:
   datasource:
-    url: jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=gdb1.miit.ru)(PORT=1521)))(CONNECT_DATA=(SERVICE_NAME=cgeneral.miit.ru)))
+    url: jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=${uploader.db.host:db2.miit.ru})(PORT=${uploader.db.port:1521})))(CONNECT_DATA=(SERVICE_NAME=${uploader.db.name:cgeneral.miit.ru})))
     username: ${uploader.db.username}
     password: ${uploader.db.password}
     driver-class-name: oracle.jdbc.OracleDriver

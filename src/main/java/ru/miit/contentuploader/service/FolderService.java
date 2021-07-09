@@ -20,7 +20,7 @@ public class FolderService {
 
     private final Uploader uploader;
     //TODO go to database and fetch supported file types
-    static final Set<String> supportedExtensions = new HashSet<>(Arrays.asList("jpg", "jpeg", "png", "gif", "svg"));
+    static final Set<String> supportedExtensions = new HashSet<>(Arrays.asList("jpg", "jpeg", "png", "gif", "svg", "pdf"));
 
     public FolderService(Uploader uploader) {
         this.uploader = uploader;
@@ -58,13 +58,18 @@ public class FolderService {
     }
 
     private boolean isSupported(File file) {
-        String extension = FilenameUtils.getExtension(file.getName());
-        return isSupportedExtension(extension);
+        String filename = file.getName();
+        String extension = FilenameUtils.getExtension(filename);
+        boolean supported = isSupportedExtension(extension);
+
+        if(!supported) {
+            logger.warn("File '{}' extension '{}' is not supported", filename, extension);
+        }
+        return supported;
     }
 
     private boolean isSupportedExtension(String extension) {
         if (extension == null) return false;
         return supportedExtensions.contains(extension.toLowerCase());
-
     }
 }
