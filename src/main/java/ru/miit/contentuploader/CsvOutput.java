@@ -53,9 +53,13 @@ public class CsvOutput {
             }
             String line = attributes.stream()
                     .map(String::valueOf)
-                    .map(string -> string.replace(",", "\\,")) // escape
+                    .map(this::quoteDelimiter)
                     .collect(Collectors.joining(delimiter));
             out.println(line);
         });
+    }
+
+    private String quoteDelimiter(String string) {
+        return string.contains(delimiter) ? ('"' + string + '"') : string;
     }
 }

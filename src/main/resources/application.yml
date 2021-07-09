@@ -2,7 +2,7 @@ uploader:
   id-lang: 1
   query-binary-metadata: false
   dry-run: false
-  version: 1.1.1
+  version: 1.1.2
 
 spring:
   datasource:
