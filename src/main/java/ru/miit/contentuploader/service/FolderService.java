@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import ru.miit.contentuploader.model.Content;
+import ru.miit.contentuploader.utils.NaturalSortComparator;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -51,6 +52,7 @@ public class FolderService {
         try (Stream<Path> paths = Files.walk(path)) {
             return paths
                     .filter(Files::isRegularFile)
+                    .sorted(Comparator.comparing(streamPath -> streamPath.getFileName().toString(), new NaturalSortComparator()))
                     .map(Path::toFile)
                     .filter(this::isSupported)
                     .collect(Collectors.toList());
