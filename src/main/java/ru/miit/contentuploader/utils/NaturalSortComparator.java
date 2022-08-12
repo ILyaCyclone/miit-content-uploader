@@ -1,16 +1,15 @@
 package ru.miit.contentuploader.utils;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * http://fritzthecat-blog.blogspot.com/2015/10/natural-sort-order-reference.html
  */
 public class NaturalSortComparator implements Comparator<String> {
 
-    private boolean caseSensitive = false;
+    private final boolean caseSensitive = false;
+
+    private final Map<String, List<String>> splitCache = new HashMap<>();
 
     /**
      * Splits the given strings and then compares them,
@@ -18,8 +17,8 @@ public class NaturalSortComparator implements Comparator<String> {
      */
     @Override
     public int compare(String string1, String string2) {
-        final Iterator<String> iterator1 = split(string1).iterator();
-        final Iterator<String> iterator2 = split(string2).iterator();
+        final Iterator<String> iterator1 = splitCached(string1).iterator();
+        final Iterator<String> iterator2 = splitCached(string2).iterator();
 
         while (iterator1.hasNext() || iterator2.hasNext()) {
             // first has no more parts -> comes first
@@ -53,13 +52,14 @@ public class NaturalSortComparator implements Comparator<String> {
         return 0;
     }
 
+    private List<String> splitCached(String string) {
+        return splitCache.computeIfAbsent(string, this::split);
+    }
+
     /**
      * Splits given string into a list of names, numbers and separators (others).
      */
     private List<String> split(String string) {
-//        final List<String> cachedList = cache.get(string);
-//        if (cachedList != null)
-//            return cachedList;
 
         final List<String> list = new ArrayList<>();
         final StringBuilder sb = new StringBuilder();
@@ -85,14 +85,12 @@ public class NaturalSortComparator implements Comparator<String> {
                 letters = isLetter;
             }
 
-            if (isWhitespace == false)
+            if (!isWhitespace)
                 sb.append(c);
         }
 
         if (sb.length() > 0) // do not lose last part
             list.add(sb.toString());
-
-//        cache.put(string, list);
 
         return list;
     }
